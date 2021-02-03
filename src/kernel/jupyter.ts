@@ -8,7 +8,14 @@ const gatewayUrl = 'http://localhost:8888';
 const gatewayWsUrl = 'ws://localhost:8888';
 
 export const connectToKernel = async (): Promise<
-  { success: true; kernel: IKernel } | { success: false; error: Error }
+  | {
+      success: true;
+      kernel: IKernel;
+    }
+  | {
+      success: false;
+      error: Error;
+    }
 > => {
   try {
     const kernelSpecs = await Kernel.getSpecs({

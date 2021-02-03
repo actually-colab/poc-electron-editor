@@ -1,5 +1,6 @@
 import React from 'react';
 import AceEditor from 'react-ace';
+import { Provider, useDispatch, useSelector } from 'react-redux';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 
 import 'ace-builds/src-noconflict/mode-python';
@@ -7,59 +8,92 @@ import 'ace-builds/src-noconflict/theme-xcode';
 import 'ace-builds/src-noconflict/ext-language_tools';
 import './App.global.css';
 
-import useKernel from './kernel/useKernel';
-import { executeCode } from './kernel/jupyter';
+import store, { ReduxState } from './redux';
+import { _editor } from './redux/actions';
+import { EditorCell } from './redux/editor';
+
+const editorOptions = {
+  enableBasicAutocompletion: true,
+  enableLiveAutocompletion: true,
+};
 
 const Editor = () => {
-  const kernel = useKernel();
-  const [code, setCode] = React.useState<string>('');
-  const [output, setOutput] = React.useState<string[]>([]);
+  const isConnectingToKernel = useSelector(
+    (state: ReduxState) => state.editor.isConnectingToKernel
+  );
+  const connectToKernelErrorMessage = useSelector(
+    (state: ReduxState) => state.editor.connectToKernelErrorMessage
+  );
+  const kernel = useSelector((state: ReduxState) => state.editor.kernel);
+  const cells = useSelector((state: ReduxState) => state.editor.cells);
 
-  const editorOptions = {
-    enableBasicAutocompletion: true,
-    enableLiveAutocompletion: true,
-  };
+  const dispatch = useDispatch();
+  const dispatchConnectToKernel = React.useCallback(
+    () => dispatch(_editor.connectToKernel()),
+    [dispatch]
+  );
+  const dispatchExecuteCode = React.useCallback(
+    (cell: EditorCell) =>
+      kernel !== null && dispatch(_editor.executeCode(kernel, cell)),
+    [dispatch, kernel]
+  );
+  const dispatchUpdateCellCode = React.useCallback(
+    (cellId: string, code: string) =>
+      dispatch(_editor.updateCellCode(cellId, code)),
+    [dispatch]
+  );
 
-  const execute = React.useCallback(async () => {
-    if (kernel === null) {
-      setOutput([]);
-    } else {
-      const ioOutput = await executeCode(kernel, code);
-
-      setOutput(
-        ioOutput
-          .filter((msg) => msg.content.name === 'stdout')
-          .map((msg) => msg.content.text as string)
-      );
+  React.useEffect(() => {
+    if (
+      !isConnectingToKernel &&
+      connectToKernelErrorMessage === '' &&
+      kernel === null
+    ) {
+      dispatchConnectToKernel();
     }
-  }, [code, kernel]);
+  }, [
+    connectToKernelErrorMessage,
+    dispatchConnectToKernel,
+    isConnectingToKernel,
+    kernel,
+  ]);
 
   return (
     <div>
-      <AceEditor
-        name="ace-editor-1"
-        mode="python"
-        theme="xcode"
-        value={code}
-        onChange={(newValue) => setCode(newValue)}
-        setOptions={editorOptions}
-      />
+      {cells.map((cell) => (
+        <React.Fragment key={cell._id}>
+          <AceEditor
+            name={cell._id}
+            mode="python"
+            theme="xcode"
+            value={cell.code}
+            onChange={(newValue) => dispatchUpdateCellCode(cell._id, newValue)}
+            setOptions={editorOptions}
+          />
 
-      <button type="button" onClick={execute}>
-        Execute
-      </button>
+          <button
+            type="button"
+            disabled={kernel === null || cell.active}
+            onClick={() => dispatchExecuteCode(cell)}
+          >
+            Execute
+          </button>
 
-      <p>{output.join('')}</p>
+          <p>{cell.output.join('')}</p>
+        </React.Fragment>
+      ))}
     </div>
   );
 };
 
 export default function App() {
   return (
-    <Router>
-      <Switch>
-        <Route path="/" component={Editor} />
-      </Switch>
-    </Router>
+    <Provider store={store}>
+      <Router>
+        <Switch>
+          <Route path="/" component={Editor} />
+        </Switch>
+      </Router>
+    </Provider>
   );
 }
