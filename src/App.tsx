@@ -79,7 +79,15 @@ const Editor = () => {
             Execute
           </button>
 
-          <p>{cell.output.join('')}</p>
+          <div>
+            {cell.output.map((text, index) => (
+              <React.Fragment key={index}>
+                {text.split('\n').map((subtext, subindex) => (
+                  <p key={`${index}.${subindex}`}>{subtext}</p>
+                ))}
+              </React.Fragment>
+            ))}
+          </div>
         </React.Fragment>
       ))}
     </div>
