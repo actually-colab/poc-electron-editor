@@ -1,4 +1,5 @@
 import { IKernel } from 'jupyter-js-services';
+import { EditorCell } from '../kernel/types';
 import {
   CONNECT_TO_KERNEL_FAILURE,
   CONNECT_TO_KERNEL_START,
@@ -10,14 +11,6 @@ import {
   RECEIVE_KERNEL_MESSAGE,
   UPDATE_CELL_CODE,
 } from './types/editor';
-
-export type EditorCell = {
-  _id: string;
-  runIndex: number;
-  active: boolean;
-  code: string;
-  output: string[];
-};
 
 export interface EditorState {
   isConnectingToKernel: boolean;

@@ -2,6 +2,8 @@ import { IKernel } from 'jupyter-js-services';
 import { Action } from 'redux';
 import { ThunkAction } from 'redux-thunk';
 
+import { KernelOutput } from '../../kernel/types';
+
 export const CONNECT_TO_KERNEL_START = 'CONNECT_TO_KERNEL_START';
 export const CONNECT_TO_KERNEL_SUCCESS = 'CONNECT_TO_KERNEL_SUCCESS';
 export const CONNECT_TO_KERNEL_FAILURE = 'CONNECT_TO_KERNEL_FAILURE';
@@ -49,7 +51,7 @@ type ExecuteCodeFailureAction = {
 type ReceiveKernelMessageAction = {
   type: typeof RECEIVE_KERNEL_MESSAGE;
   cellId: string;
-  message: string;
+  message: KernelOutput;
 };
 
 type UpdateCellCodeAction = {

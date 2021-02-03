@@ -11,9 +11,8 @@ import {
   RECEIVE_KERNEL_MESSAGE,
   UPDATE_CELL_CODE,
 } from '../types/editor';
-
 import * as jupyter from '../../kernel/jupyter';
-import { EditorCell } from '../editor';
+import { EditorCell, KernelOutput } from '../../kernel/types';
 
 const connectToKernelStart = (): EditorActionTypes => ({
   type: CONNECT_TO_KERNEL_START,
@@ -68,7 +67,7 @@ const executeCodeFailure = (
 
 const receiveKernelMessage = (
   cellId: string,
-  message: string
+  message: KernelOutput
 ): EditorActionTypes => ({
   type: RECEIVE_KERNEL_MESSAGE,
   cellId,
@@ -86,8 +85,33 @@ export const executeCode = (
   });
 
   future.onIOPub = (message) => {
-    if (message.content.name === 'stdout') {
-      dispatch(receiveKernelMessage(cell._id, message.content.text as string));
+    let kernelOutput: KernelOutput | null = null;
+
+    try {
+      if (message.content.name === 'stdout') {
+        kernelOutput = {
+          _id: message.header.msg_id,
+          name: 'stdout',
+          data: {
+            text: message.content.text as string,
+          },
+        };
+      } else if (message.header.msg_type === 'display_data') {
+        kernelOutput = {
+          _id: message.header.msg_id,
+          name: 'display_data',
+          data: {
+            text: (message.content.data as any)['text/plain'],
+            image: (message.content.data as any)['image/png'],
+          },
+        };
+      }
+    } catch (error) {
+      console.error(error);
+    }
+
+    if (kernelOutput !== null) {
+      dispatch(receiveKernelMessage(cell._id, kernelOutput));
     }
   };
 

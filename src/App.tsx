@@ -10,7 +10,7 @@ import './App.global.css';
 
 import store, { ReduxState } from './redux';
 import { _editor } from './redux/actions';
-import { EditorCell } from './redux/editor';
+import { EditorCell } from './kernel/types';
 
 const editorOptions = {
   enableBasicAutocompletion: true,
@@ -80,13 +80,16 @@ const Editor = () => {
           </button>
 
           <div>
-            {cell.output.map((text, index) => (
-              <React.Fragment key={index}>
-                {text.split('\n').map((subtext, subindex) => (
-                  <p key={`${index}.${subindex}`}>{subtext}</p>
-                ))}
-              </React.Fragment>
-            ))}
+            {cell.output.map(
+              (message) =>
+                message.name === 'stdout' && (
+                  <React.Fragment key={message._id}>
+                    {message.data.text.split('\n').map((subtext, subindex) => (
+                      <p key={`${message._id}.${subindex}`}>{subtext}</p>
+                    ))}
+                  </React.Fragment>
+                )
+            )}
           </div>
         </React.Fragment>
       ))}
