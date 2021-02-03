@@ -5,6 +5,8 @@ module.exports = {
     'import/no-extraneous-dependencies': 'off',
     '@typescript-eslint/ban-ts-comment': 'off',
     'no-console': 'off',
+    'no-underscore-dangle': 'off',
+    'import/prefer-default-export': 'off',
   },
   parserOptions: {
     ecmaVersion: 2020,
