@@ -11,6 +11,7 @@ import './App.global.css';
 import store, { ReduxState } from './redux';
 import { _editor } from './redux/actions';
 import { EditorCell } from './kernel/types';
+import useKernel from './kernel/useKernel';
 
 const editorOptions = {
   enableBasicAutocompletion: true,
@@ -18,13 +19,10 @@ const editorOptions = {
 };
 
 const Editor = () => {
-  const isConnectingToKernel = useSelector((state: ReduxState) => state.editor.isConnectingToKernel);
-  const connectToKernelErrorMessage = useSelector((state: ReduxState) => state.editor.connectToKernelErrorMessage);
-  const kernel = useSelector((state: ReduxState) => state.editor.kernel);
+  const kernel = useKernel();
   const cells = useSelector((state: ReduxState) => state.editor.cells);
 
   const dispatch = useDispatch();
-  const dispatchConnectToKernel = React.useCallback(() => dispatch(_editor.connectToKernel()), [dispatch]);
   const dispatchExecuteCode = React.useCallback(
     (cell: EditorCell) => kernel !== null && dispatch(_editor.executeCode(kernel, cell)),
     [dispatch, kernel]
@@ -33,12 +31,6 @@ const Editor = () => {
     (cellId: string, code: string) => dispatch(_editor.updateCellCode(cellId, code)),
     [dispatch]
   );
-
-  React.useEffect(() => {
-    if (!isConnectingToKernel && connectToKernelErrorMessage === '' && kernel === null) {
-      dispatchConnectToKernel();
-    }
-  }, [connectToKernelErrorMessage, dispatchConnectToKernel, isConnectingToKernel, kernel]);
 
   return (
     <div>
