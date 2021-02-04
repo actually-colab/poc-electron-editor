@@ -80,16 +80,22 @@ const Editor = () => {
           </button>
 
           <div>
-            {cell.output.map(
-              (message) =>
-                message.name === 'stdout' && (
-                  <React.Fragment key={message._id}>
-                    {message.data.text.split('\n').map((subtext, subindex) => (
+            {cell.output.map((message) => (
+              <React.Fragment key={message._id}>
+                {message.name === 'stdout' ? (
+                  message.data.text
+                    .split('\n')
+                    .map((subtext, subindex) => (
                       <p key={`${message._id}.${subindex}`}>{subtext}</p>
-                    ))}
-                  </React.Fragment>
-                )
-            )}
+                    ))
+                ) : message.name === 'display_data' ? (
+                  <img
+                    src={`data:image/png;base64,${message.data.image}`}
+                    alt=""
+                  />
+                ) : null}
+              </React.Fragment>
+            ))}
           </div>
         </React.Fragment>
       ))}
