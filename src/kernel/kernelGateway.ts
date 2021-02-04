@@ -4,9 +4,7 @@ import util from 'util';
 const execWithPromise = util.promisify(exec);
 
 export const installKernelGateway = async () => {
-  const { stdout, stderr } = await execWithPromise(
-    'python3 -m pip install jupyter_kernel_gateway'
-  );
+  const { stdout, stderr } = await execWithPromise('python3 -m pip install jupyter_kernel_gateway');
 
   if (stderr) {
     console.error(stderr);

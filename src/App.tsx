@@ -18,45 +18,27 @@ const editorOptions = {
 };
 
 const Editor = () => {
-  const isConnectingToKernel = useSelector(
-    (state: ReduxState) => state.editor.isConnectingToKernel
-  );
-  const connectToKernelErrorMessage = useSelector(
-    (state: ReduxState) => state.editor.connectToKernelErrorMessage
-  );
+  const isConnectingToKernel = useSelector((state: ReduxState) => state.editor.isConnectingToKernel);
+  const connectToKernelErrorMessage = useSelector((state: ReduxState) => state.editor.connectToKernelErrorMessage);
   const kernel = useSelector((state: ReduxState) => state.editor.kernel);
   const cells = useSelector((state: ReduxState) => state.editor.cells);
 
   const dispatch = useDispatch();
-  const dispatchConnectToKernel = React.useCallback(
-    () => dispatch(_editor.connectToKernel()),
-    [dispatch]
-  );
+  const dispatchConnectToKernel = React.useCallback(() => dispatch(_editor.connectToKernel()), [dispatch]);
   const dispatchExecuteCode = React.useCallback(
-    (cell: EditorCell) =>
-      kernel !== null && dispatch(_editor.executeCode(kernel, cell)),
+    (cell: EditorCell) => kernel !== null && dispatch(_editor.executeCode(kernel, cell)),
     [dispatch, kernel]
   );
   const dispatchUpdateCellCode = React.useCallback(
-    (cellId: string, code: string) =>
-      dispatch(_editor.updateCellCode(cellId, code)),
+    (cellId: string, code: string) => dispatch(_editor.updateCellCode(cellId, code)),
     [dispatch]
   );
 
   React.useEffect(() => {
-    if (
-      !isConnectingToKernel &&
-      connectToKernelErrorMessage === '' &&
-      kernel === null
-    ) {
+    if (!isConnectingToKernel && connectToKernelErrorMessage === '' && kernel === null) {
       dispatchConnectToKernel();
     }
-  }, [
-    connectToKernelErrorMessage,
-    dispatchConnectToKernel,
-    isConnectingToKernel,
-    kernel,
-  ]);
+  }, [connectToKernelErrorMessage, dispatchConnectToKernel, isConnectingToKernel, kernel]);
 
   return (
     <div>
@@ -71,11 +53,7 @@ const Editor = () => {
             setOptions={editorOptions}
           />
 
-          <button
-            type="button"
-            disabled={kernel === null || cell.active}
-            onClick={() => dispatchExecuteCode(cell)}
-          >
+          <button type="button" disabled={kernel === null || cell.active} onClick={() => dispatchExecuteCode(cell)}>
             Execute
           </button>
 
@@ -85,14 +63,9 @@ const Editor = () => {
                 {message.name === 'stdout' ? (
                   message.data.text
                     .split('\n')
-                    .map((subtext, subindex) => (
-                      <p key={`${message._id}.${subindex}`}>{subtext}</p>
-                    ))
+                    .map((subtext, subindex) => <p key={`${message._id}.${subindex}`}>{subtext}</p>)
                 ) : message.name === 'display_data' ? (
-                  <img
-                    src={`data:image/png;base64,${message.data.image}`}
-                    alt=""
-                  />
+                  <img src={`data:image/png;base64,${message.data.image}`} alt="" />
                 ) : null}
               </React.Fragment>
             ))}

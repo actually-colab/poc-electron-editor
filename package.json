@@ -290,7 +290,8 @@
         }
       }
     ],
-    "singleQuote": true
+    "singleQuote": true,
+    "printWidth": 120
   },
   "renovate": {
     "extends": [

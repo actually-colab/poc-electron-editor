@@ -30,9 +30,7 @@ const connectToKernelFailure = (errorMessage: string): EditorActionTypes => ({
   },
 });
 
-export const connectToKernel = (): EditorAsyncActionTypes => async (
-  dispatch
-) => {
+export const connectToKernel = (): EditorAsyncActionTypes => async (dispatch) => {
   dispatch(connectToKernelStart());
 
   const res = await jupyter.connectToKernel();
@@ -54,10 +52,7 @@ const executeCodeSuccess = (cellId: string): EditorActionTypes => ({
   cellId,
 });
 
-const executeCodeFailure = (
-  cellId: string,
-  errorMessage: string
-): EditorActionTypes => ({
+const executeCodeFailure = (cellId: string, errorMessage: string): EditorActionTypes => ({
   type: EXECUTE_CODE_FAILURE,
   cellId,
   error: {
@@ -65,19 +60,13 @@ const executeCodeFailure = (
   },
 });
 
-const receiveKernelMessage = (
-  cellId: string,
-  message: KernelOutput
-): EditorActionTypes => ({
+const receiveKernelMessage = (cellId: string, message: KernelOutput): EditorActionTypes => ({
   type: RECEIVE_KERNEL_MESSAGE,
   cellId,
   message,
 });
 
-export const executeCode = (
-  kernel: IKernel,
-  cell: EditorCell
-): EditorAsyncActionTypes => async (dispatch) => {
+export const executeCode = (kernel: IKernel, cell: EditorCell): EditorAsyncActionTypes => async (dispatch) => {
   dispatch(executeCodeStart(cell._id));
 
   const future = kernel.execute({
@@ -124,10 +113,7 @@ export const executeCode = (
   dispatch(executeCodeSuccess(cell._id));
 };
 
-export const updateCellCode = (
-  cellId: string,
-  code: string
-): EditorActionTypes => ({
+export const updateCellCode = (cellId: string, code: string): EditorActionTypes => ({
   type: UPDATE_CELL_CODE,
   cellId,
   code,

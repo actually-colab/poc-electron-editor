@@ -70,9 +70,4 @@ export type EditorActionTypes =
   | ReceiveKernelMessageAction
   | UpdateCellCodeAction;
 
-export type EditorAsyncActionTypes = ThunkAction<
-  void,
-  unknown,
-  unknown,
-  Action<string>
->;
+export type EditorAsyncActionTypes = ThunkAction<void, unknown, unknown, Action<string>>;

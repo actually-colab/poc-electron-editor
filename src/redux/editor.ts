@@ -44,10 +44,7 @@ const initialState: EditorState = {
   ],
 };
 
-const reducer = (
-  state = initialState,
-  action: EditorActionTypes
-): EditorState => {
+const reducer = (state = initialState, action: EditorActionTypes): EditorState => {
   switch (action.type) {
     case CONNECT_TO_KERNEL_START:
       return {
