@@ -3,15 +3,13 @@ import AceEditor from 'react-ace';
 import { Provider, useDispatch, useSelector } from 'react-redux';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 
-import 'ace-builds/src-noconflict/mode-python';
-import 'ace-builds/src-noconflict/theme-xcode';
-import 'ace-builds/src-noconflict/ext-language_tools';
 import './App.global.css';
 
 import store, { ReduxState } from './redux';
 import { _editor } from './redux/actions';
 import { EditorCell } from './kernel/types';
 import useKernel from './kernel/useKernel';
+import AceImports from './components/AceImports';
 
 const editorOptions = {
   enableBasicAutocompletion: true,
@@ -34,6 +32,8 @@ const Editor = () => {
 
   return (
     <div>
+      {AceImports}
+
       {cells.map((cell) => (
         <React.Fragment key={cell._id}>
           <AceEditor
