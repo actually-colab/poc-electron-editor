@@ -1,6 +1,8 @@
 export type KernelOutput =
   | {
       _id: string;
+      runIndex?: number;
+      outputIndex?: number;
       name: 'stdout';
       data: {
         text: string;
@@ -8,6 +10,8 @@ export type KernelOutput =
     }
   | {
       _id: string;
+      runIndex?: number;
+      outputIndex?: number;
       name: 'display_data';
       data: {
         text?: string;

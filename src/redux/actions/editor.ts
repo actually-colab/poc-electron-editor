@@ -60,11 +60,14 @@ const executeCodeFailure = (cellId: string, errorMessage: string): EditorActionT
   },
 });
 
-const receiveKernelMessage = (cellId: string, message: KernelOutput): EditorActionTypes => ({
-  type: RECEIVE_KERNEL_MESSAGE,
-  cellId,
-  message,
-});
+const receiveKernelMessage = (cellId: string, message: KernelOutput): EditorActionTypes => {
+  console.log('Received message', message);
+  return {
+    type: RECEIVE_KERNEL_MESSAGE,
+    cellId,
+    message,
+  };
+};
 
 export const executeCode = (kernel: IKernel, cell: EditorCell): EditorAsyncActionTypes => async (dispatch) => {
   dispatch(executeCodeStart(cell._id));
@@ -73,13 +76,21 @@ export const executeCode = (kernel: IKernel, cell: EditorCell): EditorAsyncActio
     code: cell.code,
   });
 
+  let executionCount = -1;
+  let outputIndex = 0;
+  const queue: KernelOutput[] = [];
+
   future.onIOPub = (message) => {
     let kernelOutput: KernelOutput | null = null;
 
     try {
-      if (message.content.name === 'stdout') {
+      if (message.content.execution_count !== undefined) {
+        executionCount = message.content.execution_count as number;
+        console.log('Received execution index', executionCount);
+      } else if (message.content.name === 'stdout') {
         kernelOutput = {
           _id: message.header.msg_id,
+          outputIndex,
           name: 'stdout',
           data: {
             text: message.content.text as string,
@@ -88,6 +99,7 @@ export const executeCode = (kernel: IKernel, cell: EditorCell): EditorAsyncActio
       } else if (message.header.msg_type === 'display_data') {
         kernelOutput = {
           _id: message.header.msg_id,
+          outputIndex,
           name: 'display_data',
           data: {
             text: (message.content.data as any)['text/plain'],
@@ -100,7 +112,30 @@ export const executeCode = (kernel: IKernel, cell: EditorCell): EditorAsyncActio
     }
 
     if (kernelOutput !== null) {
-      dispatch(receiveKernelMessage(cell._id, kernelOutput));
+      outputIndex++;
+
+      if (executionCount !== -1) {
+        // regular pathway
+        dispatch(
+          receiveKernelMessage(cell._id, {
+            ...kernelOutput,
+            runIndex: executionCount,
+          })
+        );
+      } else {
+        // Store messages until execution count is available
+        queue.push(kernelOutput);
+      }
+    } else if (executionCount !== -1 && queue.length > 0) {
+      // process any messages in queue
+      for (const output of queue) {
+        dispatch(
+          receiveKernelMessage(cell._id, {
+            ...output,
+            runIndex: executionCount,
+          })
+        );
+      }
     }
   };
 
